@@ -1,3 +1,4 @@
+use std::ffi::OsString;
 use paprika::{App, Ops};
 
 
@@ -24,9 +25,29 @@ impl JsRuntimeCli{
         let app = App::new();
         Self{app}
     }
-    pub fn start(&mut self){
-        self.app.parse();
 
+    /// start function will return Option<str>
+    /// The return value will optionally be the filename
+    pub fn start(&mut self) -> Option<OsString>{
+        self.set_options();
+        self.app.parse();
+        // check if the file name has been passed in the cli argument
+        if self.check_if_option_exists(FILE) {
+            let filename = OsString::from(self.get_file_option(FILE));
+            Some(filename)
+        }
+        // check if the version has been passed in the cli argument
+        else if self.check_if_option_exists(VERSION) {
+            println!("runtime version {}",PROJECT_VERSION);
+            None
+        }
+        // check if the help has been passed in the cli argument
+        else if self.check_if_option_exists(HELP) {
+            self.print_usage();
+            None
+        }else{
+            None
+        }
     }
 
     fn set_options(&mut self){
@@ -35,7 +56,7 @@ impl JsRuntimeCli{
         self.app.add_ops(self.set_option(VERSION,"v"));
 
     }
-    fn set_option(&mut self,long:&str,short:&str) -> Ops{
+    fn set_option(&self,long:&str,short:&str) -> Ops{
         Ops::new()
             .long(long)
             .short(short)
@@ -49,22 +70,13 @@ impl JsRuntimeCli{
         }
     }
 
-    fn get_file_option(&self) -> String{
-        let file_option = self.app.get_value(FILE).unwrap();
+    fn get_file_option(&self,option_name:&str) -> String{
+        let file_option = self.app.get_value(option_name).unwrap();
         file_option
     }
 
-    fn get_version_option(&self) -> String {
-        let version = self.app.get_value(VERSION).unwrap();
-        version
-    }
-
-    fn get_help_option(&self) -> String{
-        let help_option = self.app.get_value(HELP).unwrap();
-        help_option
-    }
-
     fn print_usage(&self){
-        println!("{}",USAGE)
+        println!("{}",USAGE);
+        std::process::exit(0);
     }
 }
