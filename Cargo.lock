@@ -12,6 +12,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "argmap"
+version = "1.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c007f456524f3f1e06e8929963425b5dadf8616d9110ea0809840c16997994e9"
+
+[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -463,8 +469,8 @@ dependencies = [
 name = "js_runtime"
 version = "0.1.0"
 dependencies = [
+ "argmap",
  "boa_engine",
- "paprika",
 ]
 
 [[package]]
@@ -576,12 +582,6 @@ name = "once_cell"
 version = "1.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b7e5500299e16ebb147ae15a00a942af264cf3688f47923b8fc2cd5858f23ad3"
-
-[[package]]
-name = "paprika"
-version = "0.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "925e7405bb3f1e0a6f170b4e66008d3f58486786a270a167607fdd31154ebfcf"
 
 [[package]]
 name = "parking_lot"

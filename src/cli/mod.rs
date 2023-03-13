@@ -1,13 +1,14 @@
+use std::env::Args;
 use std::ffi::OsString;
-use paprika::{App, Ops};
+use argmap::*;
 
 
 /// CONSTANTS
 /// These are the constants that will be used for the arguments
 const PROJECT_VERSION:&'static str = env!("CARGO_PKG_VERSION");
-const FILE:&'static str = "file";
-const VERSION:&'static str = "version";
-const HELP:&'static str = "help";
+const FILE_ARG:(&str,&str) = ("file","f");
+const VERSION_ARG:(&str,&str) = ("version","v");
+const HELP_ARG:(&str,&str) = ("help","h");
 const USAGE:&'static str = r#"
     This is the javascript runtime built on top of Boa Engine.
     USAGE:
@@ -16,67 +17,67 @@ const USAGE:&'static str = r#"
         -h | --help     <FLAG>   => Display the usage of cli.
 "#;
 
-
 pub struct JsRuntimeCli{
-    app:App
+    arg_map: ArgMap,
+    args: List,
+    argv: Map
 }
-impl JsRuntimeCli{
-    pub fn new() -> Self{
-        let app = App::new();
-        Self{app}
+
+impl JsRuntimeCli {
+    pub fn new(booleans:&[&str],args:Args) -> Self {
+        // let args = &["h","help","v","version"];
+        let mut arg_map = argmap::new().booleans(booleans);
+        let (args,argv) = arg_map.parse(args);
+        Self{
+            arg_map,
+            args,
+            argv
+        }
     }
 
-    /// start function will return Option<str>
-    /// The return value will optionally be the filename
-    pub fn start(&mut self) -> Option<OsString>{
-        self.set_options();
-        self.app.parse();
-        // check if the file name has been passed in the cli argument
-        if self.check_if_option_exists(FILE) {
-            let filename = OsString::from(self.get_file_option(FILE));
-            Some(filename)
-        }
-        // check if the version has been passed in the cli argument
-        else if self.check_if_option_exists(VERSION) {
-            println!("runtime version {}",PROJECT_VERSION);
+    pub fn start(&self) -> Option<String> {
+        if self.get_key(FILE_ARG.0,FILE_ARG.1) {
+           let file = self.get_last_value_from_vec();
+            if file.0.is_some() && file.1.is_none() {
+                let long_file_arg= file.0.unwrap().to_string();
+                Some(long_file_arg)
+            }else{
+                let short_file_arg = file.1.unwrap().to_string();
+                Some(short_file_arg)
+            }
+        } else if self.get_key(VERSION_ARG.0,VERSION_ARG.1) {
+            println!("version {}",PROJECT_VERSION);
             None
         }
-        // check if the help has been passed in the cli argument
-        else if self.check_if_option_exists(HELP) {
-            self.print_usage();
+        else if self.get_key(HELP_ARG.0,HELP_ARG.1) {
+            println!("{}",USAGE);
             None
         }else{
             None
         }
     }
 
-    fn set_options(&mut self){
-        self.app.add_ops(self.set_option(FILE,"f"));
-        self.app.add_ops(self.set_option(HELP,"h"));
-        self.app.add_ops(self.set_option(VERSION,"v"));
-
-    }
-    fn set_option(&self,long:&str,short:&str) -> Ops{
-        Ops::new()
-            .long(long)
-            .short(short)
+    fn get_key(&self, long:&str,short:&str) -> bool{
+        self.argv.contains_key(long) || self.argv.contains_key(short)
     }
 
-    fn check_if_option_exists(&self,option:&str) -> bool {
-        if self.app.has_ops(option) {
-            true
-        }else{
-            false
-        }
+    fn get_first_value_from_vec(&self,keys:(&str,&str)) -> TupleOptionalRefString {
+        (self.argv.get(keys.0).and_then(|v| v.first()),
+        self.argv.get(keys.1).and_then(|v| v.first()))
+    }
+    fn get_last_value_from_vec(&self,) -> TupleOptionalRefString {
+        (self.argv.get(FILE_ARG.0).and_then(|v| v.last()),
+         self.argv.get(FILE_ARG.1).and_then(|v| v.last()))
     }
 
-    fn get_file_option(&self,option_name:&str) -> String{
-        let file_option = self.app.get_value(option_name).unwrap();
-        file_option
-    }
 
-    fn print_usage(&self){
-        println!("{}",USAGE);
-        std::process::exit(0);
-    }
+}
+
+type OptionalRefString<'s> = Option<&'s String>;
+type TupleOptionalRefString<'s> = (OptionalRefString<'s>,OptionalRefString<'s>);
+
+#[cfg(test)]
+#[allow(unused_imports)]
+mod tests{
+
 }
