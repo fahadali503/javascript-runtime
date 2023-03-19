@@ -1,5 +1,6 @@
 use std::sync::{Arc, Once};
 use v8::{Isolate, OwnedIsolate};
+use crate::runtime::isolate_state::IsolateState;
 
 static INIT_PLATFORM:Once = Once::new();
 
@@ -10,7 +11,7 @@ fn init_platform(){
         v8::V8::initialize();
     });
 }
-type Arc_Isolate = Arc<OwnedIsolate>;
+
 pub struct JsRuntime{
     isolate: Option<OwnedIsolate>,
 }
@@ -29,10 +30,21 @@ impl JsRuntime {
             let context = v8::Context::new(handle_scope);
             v8::Global::new(handle_scope,context)
         };
-
+        isolate.set_slot(IsolateState::new(global_context));
         Self{
             isolate:Some(isolate)
         }
     }
+
+    // Get the Isolate
+    pub fn isolate(&mut self) -> &mut Isolate{
+        match self.isolate {
+            Some(ref mut isolate) => isolate,
+            None => {
+                unreachable!()
+            }
+        }
+    }
+
 
 }
