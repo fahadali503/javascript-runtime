@@ -1,83 +1,45 @@
-use std::env::Args;
-use std::ffi::OsString;
-use argmap::*;
+use commander::Commander;
+
+pub const APP_NAME: &str = "Binzo";
+pub const APP_DESCRIPTION: &str = "A Javascript Runtime built on top of Boa Engine.";
+pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 
-/// CONSTANTS
-/// These are the constants that will be used for the arguments
-const PROJECT_VERSION:&'static str = env!("CARGO_PKG_VERSION");
-const FILE_ARG:(&str,&str) = ("file","f");
-const VERSION_ARG:(&str,&str) = ("version","v");
-const HELP_ARG:(&str,&str) = ("help","h");
-const USAGE:&'static str = r#"
-    This is the javascript runtime built on top of Boa Engine.
-    USAGE:
-        -f | --file     <String> => The file that will be executed by runtime.
-        -v | --version  <FLAG>   => The current version of the executable.
-        -h | --help     <FLAG>   => Display the usage of cli.
-"#;
-
-pub struct JsRuntimeCli{
-    arg_map: ArgMap,
-    args: List,
-    argv: Map
+pub struct RuntimeCli {
+    commander:Commander
 }
 
-impl JsRuntimeCli {
-    pub fn new(booleans:&[&str],args:Args) -> Self {
-        // let args = &["h","help","v","version"];
-        let mut arg_map = argmap::new().booleans(booleans);
-        let (args,argv) = arg_map.parse(args);
+impl RuntimeCli {
+    pub fn new() -> Self{
+        let mut commander = Commander::new().version(APP_VERSION)
+               .usage_desc(APP_DESCRIPTION);
         Self{
-            arg_map,
-            args,
-            argv
+            commander
         }
     }
 
-    pub fn start(&self) -> Option<String> {
-        if self.get_key(FILE_ARG.0,FILE_ARG.1) {
-           let file = self.get_last_value_from_vec();
-            if file.0.is_some() && file.1.is_none() {
-                let long_file_arg= file.0.unwrap().to_string();
-                Some(long_file_arg)
-            }else{
-                let short_file_arg = file.1.unwrap().to_string();
-                Some(short_file_arg)
-            }
-        } else if self.get_key(VERSION_ARG.0,VERSION_ARG.1) {
-            println!("version {}",PROJECT_VERSION);
-            None
-        }
-        else if self.get_key(HELP_ARG.0,HELP_ARG.1) {
-            println!("{}",USAGE);
-            None
+    /// start function will return Option containing the name of the file to be
+    /// executed
+    pub fn start(self,args:Vec<String>) -> Option<String>{
+        let cli = self.set_options().commander.parse_list_or_exit(args);
+        if cli.get_str("file").is_some() {
+            cli.get_str("file")
         }else{
             None
         }
     }
-
-    fn get_key(&self, long:&str,short:&str) -> bool{
-        self.argv.contains_key(long) || self.argv.contains_key(short)
+    fn set_options(self) -> Self{
+        let commander = self.commander.
+            option_str("-f,--file [value]","file to be executed by the runtime",None);
+        Self{commander}
     }
 
-    fn get_first_value_from_vec(&self,keys:(&str,&str)) -> TupleOptionalRefString {
-        (self.argv.get(keys.0).and_then(|v| v.first()),
-        self.argv.get(keys.1).and_then(|v| v.first()))
+    fn get_str(&self,arg:&str) -> Option<String>{
+        self.commander.get_str(arg)
     }
-    fn get_last_value_from_vec(&self,) -> TupleOptionalRefString {
-        (self.argv.get(FILE_ARG.0).and_then(|v| v.last()),
-         self.argv.get(FILE_ARG.1).and_then(|v| v.last()))
-    }
-
-
 }
 
-type OptionalRefString<'s> = Option<&'s String>;
-type TupleOptionalRefString<'s> = (OptionalRefString<'s>,OptionalRefString<'s>);
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests{
-
-}
+mod tests {}

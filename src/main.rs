@@ -1,26 +1,21 @@
-use argmap::ArgMap;
-use crate::cli::JsRuntimeCli;
+use std::env::args;
+use tokio::*;
 
+use crate::cli::RuntimeCli;
 mod cli;
+mod runtime;
 
-fn main() {
+#[tokio::main]
+async fn main() {
 
-    let booleans = &["h","help","v","version"];
-    let args = std::env::args();
+    let isolate = &mut v8::Isolate::new(Default::default());
 
-    let cli = JsRuntimeCli::new(booleans,args);
-    let file_name = cli.start();
-    println!("FILE NAME {:?}",file_name);
+    let scope = &mut v8::HandleScope::new(isolate);
 
-    // let mut arg_map = argmap::new().booleans(&["h","help","v","version"]);
-    // let (args,argv) = arg_map.parse(std::env::args());
-    //
-    // println!("Args {:?}",args);
-    // println!("Argv {:?}",argv);
 
-    // println!("ArgV {:?}",argv.contains_key("h"));
-    // println!("ArgV {:?}",argv.contains_key("help"));
-    // println!("ArgV {:?}",argv.contains_key("v"));
-    // println!("ArgV {:?}",argv.contains_key("version"));
-    // println!("ArgV {:?}",argv.contains_key("file"));
+    // let args = args().collect::<Vec<String>>();
+    // let cli = RuntimeCli::new();
+    // let file_name = cli.start(args);
+    // println!("{:?}", file_name);
+
 }
