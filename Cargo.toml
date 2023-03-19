@@ -3,7 +3,7 @@ name = "js_runtime"
 version = "0.1.0"
 edition = "2021"
 authors = ["Fahad Ali"]
-description = "A Javascript Runtime built on top of Boa Engine."
+description = "A Javascript Runtime built on top of V8 Engine."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
