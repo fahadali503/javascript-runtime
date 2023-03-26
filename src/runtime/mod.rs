@@ -1,4 +1,3 @@
-pub(crate) mod js_runtime;
-mod module;
-pub(crate) mod isolate_state;
-mod types;
+pub mod module;
+pub mod runtime;
+pub mod isolate_state;

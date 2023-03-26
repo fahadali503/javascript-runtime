@@ -1,25 +1,22 @@
-use std::cell::RefCell;
-use std::env::args;
-use std::rc::Rc;
+use std::fs::read_to_string;
+use std::path::{Path, PathBuf};
 use tokio::*;
-
-use crate::cli::RuntimeCli;
-use crate::runtime::isolate_state::IsolateState;
+use js_runtime::runtime::runtime::JsRuntime;
 
 mod cli;
-mod runtime;
+
 
 #[tokio::main]
 async fn main() {
-    let mut runtime = runtime::js_runtime::JsRuntime::new();
-    let isolate = runtime.isolate();
-    let isolate_state = isolate.get_slot::<Rc<RefCell<IsolateState>>>().unwrap();
-    let is = isolate_state.borrow().get_context();
-    println!("Global Context = {:?}",is);
+    let mut runtime = JsRuntime::new();
+
+
+    runtime.import(".fs");
+    // runtime.import(r"D:\Languages\Rust\Rust Projects\js_runtime\index.js");
+
 
     // let args = args().collect::<Vec<String>>();
     // let cli = RuntimeCli::new();
     // let file_name = cli.start(args);
     // println!("{:?}", file_name);
-
 }

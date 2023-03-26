@@ -1,35 +1,33 @@
 use std::cell::RefCell;
-use std::hint::unreachable_unchecked;
 use std::rc::Rc;
-use crate::runtime::types::{GlobalContext};
+use crate::runtime::module::ModuleMap;
 
-#[derive(Debug)]
 pub struct IsolateState{
-    context: Option<GlobalContext>
+    context:Option<v8::Global<v8::Context>>,
+    pub module_map:ModuleMap
 }
-type RcRefIsolateState = Rc<RefCell<IsolateState>>;
 
 impl IsolateState{
-    pub fn new(context:GlobalContext) -> RcRefIsolateState {
+    pub fn new(context:v8::Global<v8::Context>,) -> Rc<RefCell<IsolateState>>{
         Rc::new(
             RefCell::new(
-                Self{
-                    context:Some(context)
+                IsolateState{
+                    context: Some(context),
+                    module_map:ModuleMap::new()
                 }
             )
         )
     }
 
-    pub fn get(isolate:&mut v8::Isolate) -> RcRefIsolateState {
-        isolate.get_slot::<RcRefIsolateState>()
-            .unwrap()
-            .clone()
+    pub fn get(isolate: &mut v8::Isolate) -> Rc<RefCell<Self>>{
+        let state = isolate.get_slot::<Rc<RefCell<IsolateState>>>().unwrap();
+        Rc::clone(state)
     }
 
-    pub fn get_context(&self) -> GlobalContext {
+    pub fn context(&self) -> v8::Global<v8::Context>{
         match &self.context {
-            Some(ctx) => ctx.clone(),
-            None => unsafe{unreachable_unchecked()}
+            Some(context) => context.clone(),
+            None => unreachable!()
         }
     }
 }
