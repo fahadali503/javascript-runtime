@@ -11,7 +11,8 @@ async fn main() {
     let mut runtime = JsRuntime::new();
 
 
-    runtime.import(".fs");
+    runtime.import("./index.js");
+    // runtime.import("fs");
     // runtime.import(r"D:\Languages\Rust\Rust Projects\js_runtime\index.js");
 
 

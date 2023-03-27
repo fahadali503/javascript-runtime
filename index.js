@@ -1,2 +1,4 @@
-const module = require("./myModule.js");
-console.log("This ",globalThis);
+import add from "./myModule.js";
+console.log(globalThis);
+console.log(add());
+12 + 22;

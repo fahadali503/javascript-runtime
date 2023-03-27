@@ -1,3 +1,3 @@
-export default function hello(){
-    console.log("Hello World")
+export default function add(){
+    return 21 + 23;
 }
